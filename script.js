@@ -7,55 +7,72 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const salarioBase = parseFloat(document.getElementById("salarioBase").value);
   const salarioNoPrestacional = parseFloat(document.getElementById("salarioNoPrestacional").value);
 
-  // Validaciones básicas
+  // Validación
   if (fechaFin <= fechaInicio) {
     mostrarResultado("La fecha de finalización debe ser posterior a la fecha de inicio.");
     return;
   }
 
-  // Cálculo de días trabajados
   const diasTrabajados = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
-  const diasAño = 360; // Base legal para liquidaciones
+  const diasAño = 360;
   const mesesTrabajados = diasTrabajados / 30;
 
-  // Cesantías = (Salario base * días trabajados) / 360
   const cesantias = (salarioBase * diasTrabajados) / diasAño;
-
-  // Intereses a las cesantías = Cesantías * 0.12 * (días trabajados / 360)
   const interesesCesantias = cesantias * 0.12 * (diasTrabajados / diasAño);
-
-  // Prima = (Salario base * días trabajados) / 360
   const prima = (salarioBase * diasTrabajados) / diasAño;
-
-  // Vacaciones = (Salario base * días trabajados) / 720
   const vacaciones = (salarioBase * diasTrabajados) / 720;
 
-  // Indemnización (solo si aplica)
   let indemnizacion = 0;
   if (motivo === "sin_justa_causa") {
     if (mesesTrabajados < 12) {
-      indemnizacion = salarioBase * 0.5 * mesesTrabajados; // medio salario por cada mes
+      indemnizacion = salarioBase * 0.5 * mesesTrabajados;
     } else {
       indemnizacion = salarioBase + salarioBase * 0.2 * (mesesTrabajados - 12);
     }
   }
 
-  // Total liquidación
-  const totalLiquidacion =
-    cesantias + interesesCesantias + prima + vacaciones + indemnizacion + (salarioNoPrestacional * mesesTrabajados);
+  const salarioNoPrestacionalTotal = salarioNoPrestacional; // Solo el mes en curso
 
-  // Mostrar resultados
+  const totalLiquidacion =
+    cesantias + interesesCesantias + prima + vacaciones + indemnizacion + salarioNoPrestacionalTotal;
+
   mostrarResultado(`
     <strong>Días trabajados:</strong> ${diasTrabajados} días<br/>
-    <strong>Cesantías:</strong> $${cesantias.toFixed(2)}<br/>
-    <strong>Intereses cesantías:</strong> $${interesesCesantias.toFixed(2)}<br/>
-    <strong>Prima de servicios:</strong> $${prima.toFixed(2)}<br/>
-    <strong>Vacaciones:</strong> $${vacaciones.toFixed(2)}<br/>
-    <strong>Indemnización:</strong> $${indemnizacion.toFixed(2)}<br/>
-    <strong>Salario no prestacional total:</strong> $${(salarioNoPrestacional * mesesTrabajados).toFixed(2)}<br/>
+    <strong>Cesantías:</strong> ${cesantias.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
+    <strong>Intereses cesantías:</strong> ${interesesCesantias.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
+    <strong>Prima de servicios:</strong> ${prima.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
+    <strong>Vacaciones:</strong> ${vacaciones.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
+    <strong>Indemnización:</strong> ${indemnizacion.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
+    <strong>Salario no prestacional del último mes:</strong> ${salarioNoPrestacionalTotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
     <hr>
-    <strong>Total liquidación:</strong> $${totalLiquidacion.toFixed(2)}
+    <strong>Total liquidación:</strong> ${totalLiquidacion.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}
   `);
+
+  // Envío a Google Sheets
+  const datosParaEnviar = {
+    motivo: motivo,
+    fechaInicio: fechaInicio.toISOString().split('T')[0],
+    fechaFin: fechaFin.toISOString().split('T')[0],
+    salarioBase: salarioBase,
+    salarioNoPrestacional: salarioNoPrestacionalTotal,
+    cesantias: parseFloat(cesantias.toFixed(2)),
+    interesesCesantias: parseFloat(interesesCesantias.toFixed(2)),
+    prima: parseFloat(prima.toFixed(2)),
+    vacaciones: parseFloat(vacaciones.toFixed(2)),
+    indemnizacion: parseFloat(indemnizacion.toFixed(2)),
+    total: parseFloat(totalLiquidacion.toFixed(2))
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbz0R7ZfNyq_KgVeQCLx3Q-vgfbCYvanyVZfpI2AsWfXbdKvj9OcR8-hZkXSKIX9Gvv5iQ/exec", {
+    method: "POST",
+    body: JSON.stringify(datosParaEnviar),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.text())
+    .then((data) => console.log("✅ Enviado a Google Sheets:", data))
+    .catch((err) => console.error("❌ Error al enviar:", err));
 });
 
 function mostrarResultado(html) {
