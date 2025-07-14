@@ -7,7 +7,6 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const salarioBase = parseFloat(document.getElementById("salarioBase").value);
   const salarioNoPrestacional = parseFloat(document.getElementById("salarioNoPrestacional").value);
 
-  // Validación
   if (fechaFin <= fechaInicio) {
     mostrarResultado("La fecha de finalización debe ser posterior a la fecha de inicio.");
     return;
@@ -31,50 +30,35 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
     }
   }
 
-  const salarioNoPrestacionalTotal = salarioNoPrestacional; // Solo el mes en curso
+  // ✅ Salario no prestacional proporcional por días del mes
+  const diasMesActual = Math.min(fechaFin.getDate(), 30);
+  const salarioNoPrestacionalTotal = (salarioNoPrestacional / 30) * diasMesActual;
 
   const totalLiquidacion =
     cesantias + interesesCesantias + prima + vacaciones + indemnizacion + salarioNoPrestacionalTotal;
 
+  // ✅ Mostrar en tabla copiable
   mostrarResultado(`
-    <strong>Días trabajados:</strong> ${diasTrabajados} días<br/>
-    <strong>Cesantías:</strong> ${cesantias.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <strong>Intereses cesantías:</strong> ${interesesCesantias.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <strong>Prima de servicios:</strong> ${prima.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <strong>Vacaciones:</strong> ${vacaciones.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <strong>Indemnización:</strong> ${indemnizacion.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <strong>Salario no prestacional del último mes:</strong> ${salarioNoPrestacionalTotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}<br/>
-    <hr>
-    <strong>Total liquidación:</strong> ${totalLiquidacion.toLocaleString('es-CO', { style: 'currency', currency: 'COP' })}
+    <table style="margin: 0 auto; border-collapse: collapse;">
+      <tr><td><strong>Días trabajados</strong></td><td>${diasTrabajados}</td></tr>
+      <tr><td><strong>Cesantías</strong></td><td>${formatearCOP(cesantias)}</td></tr>
+      <tr><td><strong>Intereses cesantías</strong></td><td>${formatearCOP(interesesCesantias)}</td></tr>
+      <tr><td><strong>Prima de servicios</strong></td><td>${formatearCOP(prima)}</td></tr>
+      <tr><td><strong>Vacaciones</strong></td><td>${formatearCOP(vacaciones)}</td></tr>
+      <tr><td><strong>Indemnización</strong></td><td>${formatearCOP(indemnizacion)}</td></tr>
+      <tr><td><strong>Salario no prestacional del último mes</strong></td><td>${formatearCOP(salarioNoPrestacionalTotal)}</td></tr>
+      <tr><td colspan="2"><hr></td></tr>
+      <tr><td><strong>Total liquidación</strong></td><td><strong>${formatearCOP(totalLiquidacion)}</strong></td></tr>
+    </table>
   `);
-
-  // Envío a Google Sheets
-  const datosParaEnviar = {
-    motivo: motivo,
-    fechaInicio: fechaInicio.toISOString().split('T')[0],
-    fechaFin: fechaFin.toISOString().split('T')[0],
-    salarioBase: salarioBase,
-    salarioNoPrestacional: salarioNoPrestacionalTotal,
-    cesantias: parseFloat(cesantias.toFixed(2)),
-    interesesCesantias: parseFloat(interesesCesantias.toFixed(2)),
-    prima: parseFloat(prima.toFixed(2)),
-    vacaciones: parseFloat(vacaciones.toFixed(2)),
-    indemnizacion: parseFloat(indemnizacion.toFixed(2)),
-    total: parseFloat(totalLiquidacion.toFixed(2))
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbz0R7ZfNyq_KgVeQCLx3Q-vgfbCYvanyVZfpI2AsWfXbdKvj9OcR8-hZkXSKIX9Gvv5iQ/exec", {
-    method: "POST",
-    body: JSON.stringify(datosParaEnviar),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => res.text())
-    .then((data) => console.log("✅ Enviado a Google Sheets:", data))
-    .catch((err) => console.error("❌ Error al enviar:", err));
 });
 
-function mostrarResultado(html) {
-  document.getElementById("resultado").innerHTML = html;
+function formatearCOP(valor) {
+  return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
 }
+
+document.getElementById("btnLimpiar").addEventListener("click", function () {
+  document.getElementById("formulario").reset();
+  document.getElementById("resultado").innerHTML = "";
+  document.getElementById("motivo").focus();
+});

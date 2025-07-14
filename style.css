@@ -44,6 +44,16 @@ button {
   cursor: pointer;
 }
 
+.botones {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.botones button {
+  flex: 1;
+}
+
 button:hover {
   background-color: #0051a3;
 }
