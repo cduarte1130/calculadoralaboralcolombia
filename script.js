@@ -57,6 +57,11 @@ function formatearCOP(valor) {
   return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
 }
 
+// Mostrar resultados en el HTML
+function mostrarResultado(html) {
+  document.getElementById("resultado").innerHTML = html;
+}
+
 document.getElementById("btnLimpiar").addEventListener("click", function () {
   document.getElementById("formulario").reset();
   document.getElementById("resultado").innerHTML = "";
