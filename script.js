@@ -7,8 +7,9 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const salarioBase = parseFloat(document.getElementById("salarioBase").value);
   const salarioNoPrestacional = parseFloat(document.getElementById("salarioNoPrestacional").value);
 
+  // Validación de fechas
   if (fechaFin <= fechaInicio) {
-    mostrarResultado("La fecha de finalización debe ser posterior a la fecha de inicio.");
+    mostrarResultado("<p>La fecha de finalización debe ser posterior a la fecha de inicio.</p>");
     return;
   }
 
@@ -17,10 +18,11 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const mesesTrabajados = diasTrabajados / 30;
 
   const cesantias = (salarioBase * diasTrabajados) / diasAño;
-  const interesesCesantias = cesantias * 0.12 * (diasTrabajados / diasAño);
+  const interesesCesantias = cesantias * 0.12;
   const prima = (salarioBase * diasTrabajados) / diasAño;
   const vacaciones = (salarioBase * diasTrabajados) / 720;
 
+  // Indemnización (si aplica)
   let indemnizacion = 0;
   if (motivo === "sin_justa_causa") {
     if (mesesTrabajados < 12) {
@@ -30,14 +32,19 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
     }
   }
 
-  // ✅ Salario no prestacional proporcional por días del mes
-  const diasMesActual = Math.min(fechaFin.getDate(), 30);
+  // Salario no prestacional proporcional por días del mes actual
+  const diasMesActual = Math.min(fechaFin.getDate(), 30); // máximo 30 días
   const salarioNoPrestacionalTotal = (salarioNoPrestacional / 30) * diasMesActual;
 
   const totalLiquidacion =
-    cesantias + interesesCesantias + prima + vacaciones + indemnizacion + salarioNoPrestacionalTotal;
+    cesantias +
+    interesesCesantias +
+    prima +
+    vacaciones +
+    indemnizacion +
+    salarioNoPrestacionalTotal;
 
-  // ✅ Mostrar en tabla copiable
+  // Mostrar resultados en tabla copiable
   mostrarResultado(`
     <table style="margin: 0 auto; border-collapse: collapse;">
       <tr><td><strong>Días trabajados</strong></td><td>${diasTrabajados}</td></tr>
@@ -53,6 +60,7 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   `);
 });
 
+// Formateador de moneda COP
 function formatearCOP(valor) {
   return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
 }
@@ -62,6 +70,7 @@ function mostrarResultado(html) {
   document.getElementById("resultado").innerHTML = html;
 }
 
+// Botón Limpiar
 document.getElementById("btnLimpiar").addEventListener("click", function () {
   document.getElementById("formulario").reset();
   document.getElementById("resultado").innerHTML = "";
