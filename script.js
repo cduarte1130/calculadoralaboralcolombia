@@ -24,9 +24,9 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   let indemnizacion = 0;
   if (motivo === "sin_justa_causa") {
     if (mesesTrabajados < 12) {
-      indemnizacion = salarioBase * 0.5 * mesesTrabajados;
+        indemnizacion = salarioBase; // Solo un mes de salario
     } else {
-      indemnizacion = salarioBase + salarioBase * 0.2 * (mesesTrabajados - 12);
+        indemnizacion = salarioBase + salarioBase * 0.2 * (mesesTrabajados - 12);
     }
   }
 
