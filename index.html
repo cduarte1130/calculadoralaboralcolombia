@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Liquidación - Colombia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Calculadora de Liquidación Laboral (Colombia)</h1>
+  <form id="formulario">
+    <label>Motivo de terminación:</label>
+    <select id="motivo" required>
+      <option value="">Seleccione...</option>
+      <option value="sin_justa_causa">Sin justa causa</option>
+      <option value="justa_causa">Justa causa</option>
+      <option value="mutuo_acuerdo">Mutuo acuerdo</option>
+      <option value="terminacion_obra">Terminación de obra</option>
+    </select>
+
+    <label>Fecha de inicio del contrato:</label>
+    <input type="date" id="fechaInicio" required />
+
+    <label>Fecha de finalización del contrato:</label>
+    <input type="date" id="fechaFin" required />
+
+    <label>Salario base prestacional (mensual):</label>
+    <input type="number" id="salarioBase" required />
+
+    <label>Salario no prestacional (mensual):</label>
+    <input type="number" id="salarioNoPrestacional" value="0" required />
+
+    <button type="submit">Calcular Liquidación</button>
+  </form>
+
+  <div id="resultado"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
