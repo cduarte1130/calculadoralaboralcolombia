@@ -17,32 +17,37 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const mesesTrabajados = diasTrabajados / 30;
 
   const añoActual = fechaFin.getFullYear();
-  const fechaEne = new Date(añoActual, 0, 1);
-  const fechaJul = new Date(añoActual, 6, 1);
+  const inicioAno = new Date(añoActual, 0, 1);
+  const inicioJul = new Date(añoActual, 6, 1);
 
-  // Cesantías e intereses (solo año actual)
-  const diasCesantias = Math.max(0, Math.ceil((fechaFin - fechaEne) / (1000 * 60 * 60 * 24)));
+  // Cesantías e intereses (solo año en curso hasta la salida)
+  const diasCesantias = Math.max(0, Math.ceil((fechaFin - inicioAno) / (1000 * 60 * 60 * 24)));
   const cesantias = (salarioBase * diasCesantias) / diasAño;
   const interesesCesantias = cesantias * 0.12;
 
-  // Prima (solo desde julio actual)
-  const diasPrima = fechaFin >= fechaJul ? Math.ceil((fechaFin - fechaJul) / (1000 * 60 * 60 * 24)) : 0;
+  // Prima de servicios (semestre correspondiente)
+  let diasPrima = 0;
+  if (fechaFin < inicioJul) {
+    diasPrima = Math.ceil((fechaFin - inicioAno) / (1000 * 60 * 60 * 24));
+  } else {
+    diasPrima = Math.ceil((fechaFin - inicioJul) / (1000 * 60 * 60 * 24));
+  }
   const prima = (salarioBase * diasPrima) / diasAño;
 
-  // Vacaciones (desde inicio contrato)
+  // Vacaciones (desde inicio del contrato)
   const vacaciones = (salarioBase * diasTrabajados) / 720;
 
-  // Indemnización (solo si es sin justa causa)
+  // Indemnización si aplica
   let indemnizacion = 0;
   if (motivo === "sin_justa_causa") {
     if (mesesTrabajados < 12) {
-      indemnizacion = salarioBase * 0.5 * mesesTrabajados;
+      indemnizacion = salarioBase;
     } else {
       indemnizacion = salarioBase + salarioBase * 0.2 * (mesesTrabajados - 12);
     }
   }
 
-  // Salario no prestacional proporcional al mes actual (máximo 30 días)
+  // Salario no prestacional proporcional al mes actual
   const diasMesActual = Math.min(fechaFin.getDate(), 30);
   const salarioNoPrestacionalTotal = (salarioNoPrestacional / 30) * diasMesActual;
 
@@ -71,9 +76,7 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
 
 function formatearCOP(valor) {
   return valor.toLocaleString("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 2,
+    style: "currency", currency: "COP", minimumFractionDigits: 2
   });
 }
 
