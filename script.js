@@ -19,13 +19,16 @@ document.getElementById("formulario").addEventListener("submit", function (e) {
   const añoInicio = fechaInicio.getFullYear();
   const añoFin = fechaFin.getFullYear();
 
-  const inicioCesantias = fechaInicio < new Date(`01/01/${añoFin}`) 
-  ? new Date(`01/01/${añoFin}`) 
-  : fechaInicio;
-
+  // Calculo cesantias e intereses de cesantias 
+  const inicioCesantias = fechaInicio > new Date(`01/01/${fechaFin.getFullYear()}`)
+    ? fechaInicio
+    : new Date(`01/01/${fechaFin.getFullYear()}`);
+  
   const diasCesantias = Math.ceil((fechaFin - inicioCesantias) / (1000 * 60 * 60 * 24));
+  
   const cesantias = (salarioBase / 360) * diasCesantias;
   const interesesCesantias = cesantias * 0.12 * (diasCesantias / 360);
+
 
   // Prima solo si es del segundo semestre o si no le han pagado aún
   let prima = 0;
