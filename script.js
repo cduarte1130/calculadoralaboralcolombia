@@ -15,7 +15,6 @@ document.getElementById("btnCalcular").addEventListener("click", function () {
         return;
     }
 
-
     const diasTrabajados = Math.floor((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
     const mesesTrabajados = diasTrabajados / 30;
 
@@ -43,7 +42,13 @@ document.getElementById("btnCalcular").addEventListener("click", function () {
     const diasMesActual = Math.min(fechaFin.getDate(), 30);
     const salarioNoPrestacionalTotal = (salarioNoPrestacional / 30) * diasMesActual;
 
-    const totalLiquidacion = cesantias + interesesCesantias + prima + vacaciones + indemnizacion + salarioNoPrestacionalTotal;
+    const totalLiquidacion = 
+        cesantias + 
+        interesesCesantias + 
+        prima + 
+        vacaciones + 
+        indemnizacion + 
+        salarioNoPrestacionalTotal;
 
     mostrarResultado(`
         <table style="margin: 0 auto; border-collapse: collapse;">
@@ -60,12 +65,16 @@ document.getElementById("btnCalcular").addEventListener("click", function () {
     `);
 });
 
-function mostrarResultado(html) {
-    document.getElementById("resultado").innerHTML = html;
+function formatearCOP(valor) {
+  return valor.toLocaleString("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 2,
+  });
 }
 
-function formatearCOP(valor) {
-    return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+function mostrarResultado(html) {
+  document.getElementById("resultado").innerHTML = html;
 }
 
 document.getElementById("btnLimpiar").addEventListener("click", function () {
