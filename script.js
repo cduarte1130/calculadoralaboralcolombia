@@ -1,4 +1,5 @@
-document.getElementById("btnCalcular").addEventListener("click", function () {
+document.getElementById("formulario").addEventListener("submit", function (e) {
+  e.preventDefault();
     const fechaInicio = new Date(document.getElementById("inicio").value);
     const fechaFin = new Date(document.getElementById("fin").value);
     const salarioBase = parseFloat(document.getElementById("salarioBase").value);
